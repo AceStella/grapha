@@ -1,10 +1,11 @@
-/* src/index.css */
-
 :root {
   /* Define a consistent font family and color scheme for our app */
   --font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   --color-background: #1e1e1e;
   --color-text: #cccccc;
+  --color-background-secondary: #252526;
+  --color-border: #333333;
+  --color-text-secondary: #8c8c8c;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -13,13 +14,19 @@
   -webkit-text-size-adjust: 100%;
 }
 
-body, html, #root {
+body, html {
   margin: 0;
   padding: 0;
-  height: 100vh;
-  width: 100vw;
-  overflow: hidden; /* Prevent scrollbars on the main window */
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+#root {
+  height: 100%;
+  width: 100%;
   font-family: var(--font-family);
   background-color: var(--color-background);
   color: var(--color-text);
+  display: flex; /* <-- Add this line */
 }

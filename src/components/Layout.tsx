@@ -1,7 +1,5 @@
-// src/renderer/src/components/Layout.tsx
-
 import React from 'react';
-import './Layout.css'; // <-- Add this line to import the CSS styles
+import './Layout.css'; 
 
 // A simple placeholder for the editor component we will build later
 const Editor = () => {
