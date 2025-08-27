@@ -1,24 +1,13 @@
-import { ipcRenderer, contextBridge } from 'electron'
+import { contextBridge, ipcRenderer } from 'electron'
 
-// --------- Expose some API to the Renderer process ---------
-contextBridge.exposeInMainWorld('ipcRenderer', {
-  on(...args: Parameters<typeof ipcRenderer.on>) {
-    const [channel, listener] = args
-    return ipcRenderer.on(channel, (event, ...args) => listener(event, ...args))
-  },
-  off(...args: Parameters<typeof ipcRenderer.off>) {
-    const [channel, ...omit] = args
-    return ipcRenderer.off(channel, ...omit)
-  },
-  send(...args: Parameters<typeof ipcRenderer.send>) {
-    const [channel, ...omit] = args
-    return ipcRenderer.send(channel, ...omit)
-  },
-  invoke(...args: Parameters<typeof ipcRenderer.invoke>) {
-    const [channel, ...omit] = args
-    return ipcRenderer.invoke(channel, ...omit)
-  },
+// Define the API we want to expose to the renderer process
+const electronAPI = {
+  openDirectory: () => ipcRenderer.invoke('open-directory'),
+  readFile: (filePath: string) => ipcRenderer.invoke('read-file'),
+}
 
-  // You can expose other APTs you need here.
-  // ...
-})
+// Expose the API to the window object under the 'electronAPI' key
+contextBridge.exposeInMainWorld('electronAPI', electronAPI)
+
+// For TypeScript to recognize the new API on the window object
+export type ElectronAPI = typeof electronAPI

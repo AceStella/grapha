@@ -1,22 +1,27 @@
-// src/renderer/src/components/Layout.tsx
-
-import React from 'react';
+import React, { useState } from 'react';
 import './Layout.css';
-import Editor from './Editor'; // Import our new professional editor
+import Editor from './Editor';
+import FileExplorer from './FileExplorer';
 
 export const Layout = () => {
+  const [currentDoc, setCurrentDoc] = useState('# Welcome to Grapha!\n\nClick "Open Vault" to start.');
+
+  const handleFileSelect = async (filePath: string) => {
+    const content = await window.electronAPI.readFile(filePath);
+    if (content !== null) {
+      setCurrentDoc(content);
+    }
+  };
+
   return (
     <div className="app-layout">
       <aside className="sidebar">
-        {/* We will add file list here later */}
-        <span>File Explorer</span>
+        <FileExplorer onFileSelect={handleFileSelect} />
       </aside>
       <main className="main-content">
-        {/* Use the new Editor component */}
-        <Editor />
+        <Editor doc={currentDoc} />
       </main>
       <footer className="status-bar">
-        {/* We will add status info here later */}
         <span>Ready</span>
       </footer>
     </div>

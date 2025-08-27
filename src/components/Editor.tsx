@@ -1,29 +1,46 @@
-// src/components/Editor.tsx
-
 import React, { useEffect, useRef } from 'react';
 import { EditorState } from '@codemirror/state';
 import { EditorView, keymap } from '@codemirror/view';
 import { defaultKeymap } from '@codemirror/commands';
 import { markdown, markdownLanguage } from '@codemirror/lang-markdown';
-import { languages } from '@codemirror/language';
+import { LanguageDescription } from '@codemirror/language';
 import { oneDark } from '@codemirror/theme-one-dark';
 
-const Editor = () => {
+// --- Start: Import specific languages ---
+import { javascript } from '@codemirror/lang-javascript';
+import { html } from '@codemirror/lang-html';
+import { css } from '@codemirror/lang-css';
+// --- End: Import specific languages ---
+
+interface EditorProps {
+  doc: string;
+}
+
+const Editor: React.FC<EditorProps> = ({ doc }) => {
   const editorRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
 
   useEffect(() => {
     if (editorRef.current && !viewRef.current) {
       const startState = EditorState.create({
-        doc: '# Hello, Grapha!\n\nThis is your new Obsidian-like editor.\n\n- Start typing...\n- Markdown is **supported**!',
+        doc: doc,
         extensions: [
           keymap.of(defaultKeymap),
           markdown({
             base: markdownLanguage,
-            codeLanguages: languages,
+            // --- Use the specific languages we imported ---
+            codeLanguages: (info: string) => {
+              // This function allows for dynamic language loading
+              // For now, we support JS, TS, HTML, and CSS
+              if (info === "js" || info === "javascript") return javascript();
+              if (info === "ts" || info === "typescript") return javascript({ typescript: true });
+              if (info === "html") return html();
+              if (info === "css") return css();
+              // Return null for unsupported languages to avoid errors
+              return null;
+            }
           }),
-          oneDark, // Using a professional dark theme
-          // Custom theme overrides to match our app's background
+          oneDark,
           EditorView.theme({
             '&': {
               backgroundColor: 'var(--color-background)',
@@ -48,14 +65,24 @@ const Editor = () => {
       viewRef.current = view;
     }
 
-    // Cleanup function to destroy the editor instance when the component unmounts
     return () => {
       if (viewRef.current) {
         viewRef.current.destroy();
         viewRef.current = null;
       }
     };
-  }, []); // Empty dependency array ensures this runs only once
+  }, []);
+
+  useEffect(() => {
+    if (viewRef.current) {
+      const currentDoc = viewRef.current.state.doc.toString();
+      if (doc !== currentDoc) {
+        viewRef.current.dispatch({
+          changes: { from: 0, to: currentDoc.length, insert: doc || '' },
+        });
+      }
+    }
+  }, [doc]);
 
   return <div ref={editorRef} style={{ height: '100%', width: '100%' }} />;
 };
