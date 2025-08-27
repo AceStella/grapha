@@ -1,32 +1,28 @@
+/* src/index.css */
+
 :root {
   /* Define a consistent font family and color scheme for our app */
   --font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   --color-background: #1e1e1e;
-  --color-text: #cccccc;
   --color-background-secondary: #252526;
   --color-border: #333333;
+  --color-text: #cccccc;
   --color-text-secondary: #8c8c8c;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  -webkit-text-size-adjust: 100%;
 }
 
-body, html {
+body, html, #root {
   margin: 0;
   padding: 0;
-  height: 100%;
-  width: 100%;
+  height: 100vh;
+  width: 100vw;
   overflow: hidden;
-}
-
-#root {
-  height: 100%;
-  width: 100%;
   font-family: var(--font-family);
   background-color: var(--color-background);
   color: var(--color-text);
-  display: flex; /* <-- Add this line */
+  /* The conflicting 'display: flex' has been removed from #root */
 }
