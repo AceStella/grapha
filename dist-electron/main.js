@@ -2007,6 +2007,16 @@ ipcMain.handle("save-file", async (_, { filePath, content }) => {
     return { success: false, error: error.message };
   }
 });
+ipcMain.handle("delete-file", async (_, { vaultPath, filePath }) => {
+  try {
+    await fs.remove(filePath);
+    const newTree = await readDirectory(vaultPath);
+    return { success: true, newTree };
+  } catch (error) {
+    console.error(`Failed to delete file: ${filePath}`, error);
+    return { success: false, error: error.message };
+  }
+});
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
     app.quit();

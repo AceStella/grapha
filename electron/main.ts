@@ -116,6 +116,17 @@ ipcMain.handle('save-file', async (_, { filePath, content }: { filePath: string;
 });
 // --- End: Add create-file handler ---
 
+ipcMain.handle('delete-file', async (_, { vaultPath, filePath }) => {
+  try {
+    await fs.remove(filePath);
+    const newTree = await readDirectory(vaultPath);
+    return { success: true, newTree };
+  } catch (error) {
+    console.error(`Failed to delete file: ${filePath}`, error);
+    return { success: false, error: (error as Error).message };
+  }
+});
+
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()
