@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import path from 'path-browserify'; // Use browser-compatible path module
 
 interface FileNode {
   name: string;
@@ -9,6 +10,7 @@ interface FileNode {
 interface FileExplorerProps {
   onFileSelect: (filePath: string) => void;
   onFileDelete: (filePath: string) => void;
+  onVaultOpen: (vaultPath: string) => void; // Add callback for vault opening
 }
 
 const FileTree: React.FC<{
@@ -43,7 +45,7 @@ const FileTree: React.FC<{
   );
 };
 
-const FileExplorer: React.FC<FileExplorerProps> = ({ onFileSelect, onFileDelete }) => {
+const FileExplorer: React.FC<FileExplorerProps> = ({ onFileSelect, onFileDelete, onVaultOpen }) => {
   const [fileTree, setFileTree] = useState<FileNode[] | null>(null);
   const [vaultPath, setVaultPath] = useState<string>('');
   const [isCreatingNote, setIsCreatingNote] = useState(false);
@@ -55,6 +57,7 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ onFileSelect, onFileDelete 
     if (result) {
       setVaultPath(result.path);
       setFileTree(result.tree);
+      onVaultOpen(result.path); // Notify parent component
     }
   };
 
@@ -71,6 +74,7 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ onFileSelect, onFileDelete 
       const result = await window.electronAPI.createFile({ directoryPath: vaultPath, fileName: newNoteName });
       if (result.success) {
         setFileTree(result.newTree);
+        onVaultOpen(vaultPath); // Re-fetch graph data after creating a file
       } else {
         alert(`Error creating file: ${result.error}`);
       }
@@ -83,16 +87,13 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ onFileSelect, onFileDelete 
   };
 
   const handleDeleteFile = async (filePath: string) => {
-    // --- Start: Fix for path.basename ---
-    // Use simple string manipulation to get the filename, avoiding Node.js 'path' module in renderer.
-    const fileName = filePath.split(/[\\/]/).pop() || filePath;
-    // --- End: Fix for path.basename ---
-
+    const fileName = path.basename(filePath);
     if (confirm(`Are you sure you want to delete ${fileName}?`)) {
       const result = await window.electronAPI.deleteFile({ vaultPath, filePath });
       if (result.success) {
         setFileTree(result.newTree);
         onFileDelete(filePath);
+        onVaultOpen(vaultPath); // Re-fetch graph data after deleting a file
       } else {
         alert(`Error deleting file: ${result.error}`);
       }
