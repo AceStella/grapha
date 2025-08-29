@@ -3,10 +3,8 @@ import path from 'node:path'
 import fs from 'fs-extra'
 import { fileURLToPath } from 'node:url'
 
-// --- Start: ES Module replacement for __dirname ---
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
-// --- End: ES Module replacement for __dirname ---
 
 process.env.APP_ROOT = path.join(__dirname, '..')
 
@@ -88,6 +86,35 @@ ipcMain.handle('read-file', async (_, filePath: string) => {
     return null;
   }
 });
+
+// --- Start: Add create-file handler ---
+ipcMain.handle('create-file', async (_, { directoryPath, fileName }) => {
+  if (!fileName.endsWith('.md')) {
+    fileName += '.md';
+  }
+  const filePath = path.join(directoryPath, fileName);
+
+  try {
+    await fs.ensureFile(filePath);
+    const newTree = await readDirectory(directoryPath);
+    return { success: true, newTree };
+  } catch (error) {
+    console.error(`Failed to create file: ${filePath}`, error);
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('save-file', async (_, { filePath, content }: { filePath: string; content: string }) => {
+  try {
+    // We use fs-extra's writeFile which is promise-based by default
+    await fs.writeFile(filePath, content, 'utf-8');
+    return { success: true };
+  } catch (error) {
+    console.error(`Failed to save file: ${filePath}`, error);
+    return { success: false, error: (error as Error).message };
+  }
+});
+// --- End: Add create-file handler ---
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {

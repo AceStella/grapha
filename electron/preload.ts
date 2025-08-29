@@ -1,13 +1,13 @@
 import { contextBridge, ipcRenderer } from 'electron'
 
-// Define the API we want to expose to the renderer process
 const electronAPI = {
   openDirectory: () => ipcRenderer.invoke('open-directory'),
-  readFile: (filePath: string) => ipcRenderer.invoke('read-file'),
+  // Correctly pass the filePath argument to the main process
+  readFile: (filePath: string) => ipcRenderer.invoke('read-file', filePath),
+  createFile: (args: { directoryPath: string; fileName: string }) => ipcRenderer.invoke('create-file', args),
+  saveFile: (args: { filePath: string; content: string }) => ipcRenderer.invoke('save-file', args),
 }
 
-// Expose the API to the window object under the 'electronAPI' key
 contextBridge.exposeInMainWorld('electronAPI', electronAPI)
 
-// For TypeScript to recognize the new API on the window object
 export type ElectronAPI = typeof electronAPI

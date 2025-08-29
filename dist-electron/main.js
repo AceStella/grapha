@@ -1984,6 +1984,29 @@ ipcMain.handle("read-file", async (_, filePath) => {
     return null;
   }
 });
+ipcMain.handle("create-file", async (_, { directoryPath, fileName }) => {
+  if (!fileName.endsWith(".md")) {
+    fileName += ".md";
+  }
+  const filePath = path$c.join(directoryPath, fileName);
+  try {
+    await fs.ensureFile(filePath);
+    const newTree = await readDirectory(directoryPath);
+    return { success: true, newTree };
+  } catch (error) {
+    console.error(`Failed to create file: ${filePath}`, error);
+    return { success: false, error: error.message };
+  }
+});
+ipcMain.handle("save-file", async (_, { filePath, content }) => {
+  try {
+    await fs.writeFile(filePath, content, "utf-8");
+    return { success: true };
+  } catch (error) {
+    console.error(`Failed to save file: ${filePath}`, error);
+    return { success: false, error: error.message };
+  }
+});
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
     app.quit();

@@ -11,7 +11,6 @@ declare namespace NodeJS {
 
 declare global {
   interface Window {
-    // Expose the API from preload script
     electronAPI: ElectronAPI
   }
 }
